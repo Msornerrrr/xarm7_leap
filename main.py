@@ -1,8 +1,10 @@
 import time
+import threading
 
 from leap_python.main import LeapNode
 from xarm.wrapper import XArmAPI
-from leap_utils.leap_teleop_thread import leap_teleop_thread
+from leap_utils.leap_teleop import leap_teleop_thread
+from xarm7_utils.xarm_teleop import xarm_teleop_thread
 
 
 def main():
@@ -23,3 +25,19 @@ def main():
 
     hand = LeapNode()
 
+    # Start xArm teleop thread
+    xarm_thread = threading.Thread(target=xarm_teleop_thread, args=(arm,))
+    xarm_thread.start()
+
+    # Start Leap teleop thread
+    leap_thread = threading.Thread(target=leap_teleop_thread, args=(hand,))
+    leap_thread.start()
+
+    input("Press Enter to stop...\n")
+    leap_thread.join()
+    xarm_thread.join()
+    print("Exiting...")
+    time.sleep(1)
+    
+if __name__ == "__main__":
+    main()
